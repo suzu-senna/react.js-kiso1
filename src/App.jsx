@@ -1,35 +1,34 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [threads, setThreads] = useState([]); 
+  const [offset, setOffset] = useState(0); 
+ 
+  const fetchThreads = (newOffset) => {
+    fetch(`https://railway.bulletinboard.techtrain.dev/threads?offset=${newOffset}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setThreads((prevThreads) => [...prevThreads, ...data]); 
+        setOffset(newOffset + 10); 
+      })
+      .catch((error) => console.error("データ取得エラー:", error));
+  };
+
+  useEffect(() => {
+    fetchThreads(0); 
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>掲示板</h1>
+      <ul>
+        {threads.map((thread) => (
+          <li key={thread.id}>{thread.title}</li>
+        ))}
+      </ul>
+      <button onClick={() => fetchThreads(offset)}>もっと見る</button>
+    </div>
+  );
 }
 
-export default App
+export default App;
